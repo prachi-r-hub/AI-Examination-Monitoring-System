@@ -1,0 +1,61 @@
+# Python environments
+venv/
+venv312/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Training dataset
+Classroom_Dataset/
+
+# Development/test scripts
+scratch_*.py
+test_*.py
+test.py
+test_script*.js
+
+# Generated test files
+test_*.jpg
+test_*.mp4
+sample_h264.mp4
+scratch_detect.txt
+
+# Ignore all training outputs
+runs/
+
+# Keep only the trained model
+!runs/
+!runs/detect/
+!runs/detect/runs/
+!runs/detect/runs/classroom_detector/
+!runs/detect/runs/classroom_detector/weights/
+!runs/detect/runs/classroom_detector/weights/best.pt
+
+# Runtime-generated data
+database/*.db
+evidence/
+scratch/
+!scratch/
+!scratch/.gitkeep
+
+# Backend test files
+backend/test.jpg
+backend/test.mp4
+
+# Node dependencies
+node_modules/
+
+# Git
+.git/
+# Deployment cleanup
+runs/detect/runs/classroom_detector/args.yaml
+runs/detect/runs/classroom_detector/labels.jpg
+runs/detect/runs/classroom_detector/results.csv
+runs/detect/runs/classroom_detector/train_batch*.jpg
+runs/detect/runs/classroom_detector/weights/last.pt
+runs/detect/train/
+runs/detect/val/
+scratch/

@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#f7f4ee] text-slate-800">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examination Monitoring System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        beige: {
+                            50: '#faf8f5',
+                            100: '#f7f4ee',
+                            200: '#eee9dd',
+                            300: '#e2d9c7'
+                        },
+                        purple: {
+                            900: '#2e2243',
+                            800: '#3b2d54',
+                            700: '#4a3a69',
+                            600: '#5c4680',
+                            100: '#f0ebf8',
+                            50: '#f7f4fc'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f7f4ee; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c8bdbe; border-radius: 4px; }
+    </style>
+</head>
+<body class="h-full font-sans antialiased flex flex-col bg-[#f7f4ee] text-slate-800 overflow-x-hidden">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-[#3b2d54] text-white px-6 py-4 flex items-center justify-between shadow-md">
+        <div class="flex items-center space-x-3">
+            <div class="p-2 bg-white/10 text-purple-100 rounded-lg border border-white/20">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold tracking-wide text-white">Examination Monitoring</h1>
+                <p class="text-xs text-purple-200">AI-assisted examination environment monitoring</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20">
+                <span id="statusIndicator" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                <span id="statusText" class="text-xs font-medium text-purple-100">System Ready</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Layout -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- Left Sidebar: Controls & Navigation -->
+        <aside class="w-72 bg-[#ffffff] border-r border-[#e2d9c7] p-5 flex flex-col justify-between overflow-y-auto custom-scrollbar shadow-sm">
+            <div class="space-y-6">
+                
+                <!-- Navigation Tabs -->
+                <div class="space-y-1.5">
+                    <h2 class="text-[11px] font-semibold uppercase text-purple-900/60 tracking-wider mb-2">Navigation</h2>
+                    
+                    <button onclick="switchTab('dashboard')" id="tabBtnDashboard" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition flex items-center justify-between bg-[#3b2d54] text-white shadow-sm">
+                        <span class="flex items-center space-x-3">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                            <span>Dashboard</span>
+                        </span>
+                    </button>
+
+                    <button onclick="switchTab('live')" id="tabBtnLive" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition flex items-center justify-between bg-[#f0ebf8] text-[#3b2d54] hover:bg-[#e6dff2]">
+                        <span class="flex items-center space-x-3">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <span>Live Monitoring</span>
+                        </span>
+                    </button>
+
+                    <button onclick="switchTab('video')" id="tabBtnVideo" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition flex items-center justify-between bg-[#f0ebf8] text-[#3b2d54] hover:bg-[#e6dff2]">
+                        <span class="flex items-center space-x-3">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
+                            <span>Video Analysis</span>
+                        </span>
+                    </button>
+
+                    <button onclick="switchTab('image')" id="tabBtnImage" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition flex items-center justify-between bg-[#f0ebf8] text-[#3b2d54] hover:bg-[#e6dff2]">
+                        <span class="flex items-center space-x-3">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span>Image Detection</span>
+                        </span>
+                    </button>
+                    
+                    <button onclick="switchTab('evidence')" id="tabBtnEvidence" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition flex items-center justify-between bg-[#f0ebf8] text-[#3b2d54] hover:bg-[#e6dff2]">
+                        <span class="flex items-center space-x-3">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                            <span>Evidence Base</span>
+                        </span>
+                    </button>
+
+                    <button onclick="switchTab('history')" id="tabBtnHistory" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition flex items-center justify-between bg-[#f0ebf8] text-[#3b2d54] hover:bg-[#e6dff2]">
+                        <span class="flex items-center space-x-3">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>History Logs</span>
+                        </span>
+                    </button>
+                    
+                    <button onclick="switchTab('settings')" id="tabBtnSettings" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition flex items-center justify-between bg-[#f0ebf8] text-[#3b2d54] hover:bg-[#e6dff2]">
+                        <span class="flex items-center space-x-3">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span>Settings</span>
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Allowed vs Restricted Rules Sidebar Block -->
+                <div class="space-y-3 pt-2 border-t border-[#e2d9c7]">
+                    <div class="bg-[#ecfdf5] p-3.5 rounded-xl border border-[#a7f3d0]">
+                        <h3 class="text-[11px] font-bold text-[#137333] uppercase tracking-wider mb-2 flex items-center space-x-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>ALLOWED MATERIALS</span>
+                        </h3>
+                        <div class="flex flex-wrap gap-1">
+                            <span class="px-2 py-0.5 bg-white text-[#137333] border border-[#a7f3d0] rounded text-[11px] font-medium">Notebook</span>
+                            <span class="px-2 py-0.5 bg-white text-[#137333] border border-[#a7f3d0] rounded text-[11px] font-medium">Paper</span>
+                            <span class="px-2 py-0.5 bg-white text-[#137333] border border-[#a7f3d0] rounded text-[11px] font-medium">Pen</span>
+                            <span class="px-2 py-0.5 bg-white text-[#137333] border border-[#a7f3d0] rounded text-[11px] font-medium">Pencil</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#fce8e6] p-3.5 rounded-xl border border-[#f5a9a8]">
+                        <h3 class="text-[11px] font-bold text-[#c5221f] uppercase tracking-wider mb-2 flex items-center space-x-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span>RESTRICTED OBJECTS</span>
+                        </h3>
+                        <div class="flex flex-wrap gap-1">
+                            <span class="px-2 py-0.5 bg-white text-[#c5221f] border border-[#f5a9a8] rounded text-[11px] font-medium">Phone</span>
+                            <span class="px-2 py-0.5 bg-white text-[#c5221f] border border-[#f5a9a8] rounded text-[11px] font-medium">Earbuds</span>
+                            <span class="px-2 py-0.5 bg-white text-[#c5221f] border border-[#f5a9a8] rounded text-[11px] font-medium">Smartwatch</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Primary Action Buttons -->
+            <div class="pt-4 space-y-2 border-t border-[#e2d9c7]">
+                <button id="btnStartCam" onclick="startCamera()" class="w-full py-2.5 bg-[#3b2d54] hover:bg-[#4a3a69] text-white font-bold rounded-xl shadow transition text-xs flex items-center justify-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>START LIVE MONITORING</span>
+                </button>
+                <button id="btnStopCam" onclick="stopCamera()" class="w-full py-2.5 bg-[#eee9dd] hover:bg-[#e2d9c7] text-[#3b2d54] font-semibold rounded-xl transition text-xs flex items-center justify-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
+                    <span>STOP CAMERA</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Right Main Workspace View -->
+        <main class="flex-1 bg-[#faf8f5] p-6 flex flex-col overflow-y-auto custom-scrollbar">
+            
+            <!-- TAB 1: DASHBOARD -->
+            <div id="viewDashboard" class="flex-1 flex flex-col space-y-6">
+                
+                <!-- SECTION 1: SYSTEM OVERVIEW -->
+                <div class="bg-white border border-[#e2d9c7] rounded-2xl p-5 shadow-sm">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-[#5c4680] mb-3.5">System Overview</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="p-3.5 rounded-xl bg-[#faf8f5] border border-[#e2d9c7] flex items-center justify-between">
+                            <div>
+                                <span class="text-[11px] text-slate-500 block font-medium">Monitoring System</span>
+                                <span class="text-xs font-bold text-slate-800 mt-0.5 block">Ready</span>
+                            </div>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-[#faf8f5] border border-[#e2d9c7] flex items-center justify-between">
+                            <div>
+                                <span class="text-[11px] text-slate-500 block font-medium">Camera</span>
+                                <span id="dashCamStatus" class="text-xs font-bold text-slate-800 mt-0.5 block">Available</span>
+                            </div>
+                            <span id="dashCamDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-[#faf8f5] border border-[#e2d9c7] flex items-center justify-between">
+                            <div>
+                                <span class="text-[11px] text-slate-500 block font-medium">Detection</span>
+                                <span class="text-xs font-bold text-slate-800 mt-0.5 block">Ready</span>
+                            </div>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-[#faf8f5] border border-[#e2d9c7] flex items-center justify-between">
+                            <div>
+                                <span class="text-[11px] text-slate-500 block font-medium">Voice Alert</span>
+                                <span class="text-xs font-bold text-slate-800 mt-0.5 block">Ready</span>
+                            </div>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2 & 4: INFOGRAPHIC + VISUAL ILLUSTRATION GRID -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- SECTION 2: EXAMINATION SAFETY OVERVIEW (Infographic Layout - 2 Cols) -->
+                    <div class="lg:col-span-2 bg-white border border-[#e2d9c7] rounded-2xl p-5 shadow-sm space-y-4">
+                        <div class="border-b border-[#eee9dd] pb-3">
+                            <h2 class="text-xs font-bold uppercase tracking-wider text-[#5c4680]">Examination Safety Overview</h2>
+                            <p class="text-xs text-slate-500 mt-0.5">Monitoring classification and observable examination room categories</p>
+                        </div>
+
+                        <!-- Infographic Cards Flow -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 relative">
+                            
+                            <!-- Category 1: Allowed Materials -->
+                            <div class="bg-[#ecfdf5] p-4 rounded-xl border border-[#a7f3d0] relative">
+                                <div class="w-8 h-8 rounded-lg bg-white text-[#137333] border border-[#a7f3d0] flex items-center justify-center mb-3">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <h3 class="text-xs font-bold text-[#137333] tracking-wide">ALLOWED MATERIALS</h3>
+                                <ul class="mt-2.5 space-y-1.5 text-xs text-slate-700 font-medium">
+                                    <li class="flex items-center space-x-2"><span class="w-1.5 h-1.5 rounded-full bg-[#137333]"></span><span>Notebook</span></li>
+                                    <li class="flex items-center space-x-2"><span class="w-1.5 h-1.5 rounded-full bg-[#137333]"></span><span>Paper</span></li>
+                                    <li class="flex items-center space-x-2"><span class="w-1.5 h-1.5 rounded-full bg-[#137333]"></span><span>Pen</span></li>
+                                    <li class="flex items-center space-x-2"><span class="w-1.5 h-1.5 rounded-full bg-[#137333]"></span><span>Pencil</span></li>
+                                </ul>
+                            </div>
+
+                            <!-- Category 2: Restricted Objects -->
+                            <div class="bg-[#fce8e6] p-4 rounded-xl border border-[#f5a9a8] relative">
+                                <div class="w-8 h-8 rounded-lg bg-white text-[#c5221f] border border-[#f5a9a8] flex items-center justify-center mb-3">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                </div>
+                                <h3 class="text-xs font-bold text-[#c5221f] tracking-wide">RESTRICTED OBJECTS</h3>
+                                <ul class="mt-2.5 space-y-1.5 text-xs text-slate-700 font-medium">
+                                    <li class="flex items-center space-x-2"><span class="w-1.5 h-1.5 rounded-full bg-[#c5221f]"></span><span>Phone</span></li>
+                                    <li class="flex items-center space-x-2"><span class="w-1.5 h-1.5 rounded-full bg-[#c5221f]"></span><span>Earbuds</span></li>
+                                    <li class="flex items-center space-x-2"><span class="w-1.5 h-1.5 rounded-full bg-[#c5221f]"></span><span>Smartwatch</span></li>
+                                </ul>
+                            </div>
+
+                            <!-- Category 3: Behaviour Review -->
+                            <div class="bg-[#fef7e0] p-4 rounded-xl border border-[#fdd835] relative">
+                                <div class="w-8 h-8 rounded-lg bg-white text-[#b06000] border border-[#fdd835] flex items-center justify-center mb-3">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </div>
+                                <h3 class="text-xs font-bold text-[#b06000] tracking-wide">BEHAVIOUR REVIEW</h3>
+                                <ul class="mt-2.5 space-y-1.5 text-[11px] text-slate-700 font-medium">
+                                    <li class="flex items-start space-x-1.5"><span class="w-1.5 h-1.5 rounded-full bg-[#b06000] mt-1"></span><span>Repeated head movement</span></li>
+                                    <li class="flex items-start space-x-1.5"><span class="w-1.5 h-1.5 rounded-full bg-[#b06000] mt-1"></span><span>Prohibited-object handling</span></li>
+                                    <li class="flex items-start space-x-1.5"><span class="w-1.5 h-1.5 rounded-full bg-[#b06000] mt-1"></span><span>Possible object passing</span></li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- SECTION 4: TASTEFUL EXAMINATION MONITORING SVG ILLUSTRATION (1 Col) -->
+                    <div class="bg-white border border-[#e2d9c7] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <h2 class="text-xs font-bold uppercase tracking-wider text-[#5c4680] mb-1">Environment View</h2>
+                            <p class="text-xs text-slate-500">Clean desk & video camera supervision scene</p>
+                        </div>
+                        
+                        <!-- SVG Classroom / Camera Monitoring Scene (Warm Beige/Purple Tone) -->
+                        <div class="my-4 p-4 bg-[#faf8f5] rounded-xl border border-[#eee9dd] flex items-center justify-center">
+                            <svg class="w-full h-32 max-w-[200px]" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Desk Surface -->
+                                <rect x="30" y="75" width="140" height="6" rx="2" fill="#8c77a3"/>
+                                <rect x="40" y="81" width="6" height="30" fill="#5c4680"/>
+                                <rect x="154" y="81" width="6" height="30" fill="#5c4680"/>
+                                <!-- Notebook & Pen on Desk -->
+                                <rect x="50" y="62" width="30" height="13" rx="1" fill="#f0ebf8" stroke="#8c77a3" stroke-width="1.5"/>
+                                <line x1="85" y1="67" x2="105" y2="67" stroke="#137333" stroke-width="2.5" stroke-linecap="round"/>
+                                <!-- Camera Stand -->
+                                <rect x="135" y="25" width="4" height="50" fill="#3b2d54"/>
+                                <path d="M125 25 L145 25 L142 15 L128 15 Z" fill="#4a3a69"/>
+                                <circle cx="135" cy="20" r="4" fill="#5c4680"/>
+                                <!-- Field of View Rays -->
+                                <path d="M131 22 L50 62 M131 22 L110 65" stroke="#5c4680" stroke-opacity="0.4" stroke-width="1.2" stroke-dasharray="3 2"/>
+                                <circle cx="135" cy="20" r="1.5" fill="#137333"/>
+                            </svg>
+                        </div>
+
+                        <span class="text-[11px] text-slate-500 text-center block font-medium">Calm & Trustworthy Supervision Control</span>
+                    </div>
+
+                </div>
+
+                <!-- SECTION 3: HOW THE SYSTEM WORKS (Horizontal 4-Step Visual) -->
+                <div class="bg-white border border-[#e2d9c7] rounded-2xl p-5 shadow-sm space-y-4">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-[#5c4680]">How the System Works</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
+                        
+                        <!-- Step 01 -->
+                        <div class="bg-[#faf8f5] p-4 rounded-xl border border-[#e2d9c7] space-y-1.5">
+                            <span class="text-xs font-mono font-bold text-[#5c4680] block">01 — MONITOR</span>
+                            <p class="text-xs text-slate-600 leading-normal">Real examination environment is observed in real-time.</p>
+                        </div>
+
+                        <!-- Step 02 -->
+                        <div class="bg-[#faf8f5] p-4 rounded-xl border border-[#e2d9c7] space-y-1.5">
+                            <span class="text-xs font-mono font-bold text-[#5c4680] block">02 — DETECT</span>
+                            <p class="text-xs text-slate-600 leading-normal">Objects and selected unusual behaviours are identified.</p>
+                        </div>
+
+                        <!-- Step 03 -->
+                        <div class="bg-[#faf8f5] p-4 rounded-xl border border-[#e2d9c7] space-y-1.5">
+                            <span class="text-xs font-mono font-bold text-[#5c4680] block">03 — ALERT</span>
+                            <p class="text-xs text-slate-600 leading-normal">Restricted objects trigger a visual and voice warning.</p>
+                        </div>
+
+                        <!-- Step 04 -->
+                        <div class="bg-[#faf8f5] p-4 rounded-xl border border-[#e2d9c7] space-y-1.5">
+                            <span class="text-xs font-mono font-bold text-[#5c4680] block">04 — REVIEW</span>
+                            <p class="text-xs text-slate-600 leading-normal">Recorded examination videos can be reviewed for suspicious behaviour.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION 5: QUICK ACTIONS -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button onclick="startCamera()" class="p-5 bg-[#3b2d54] hover:bg-[#4a3a69] text-white rounded-2xl transition shadow-md flex items-center justify-between group">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-2.5 bg-white/10 rounded-xl">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            </div>
+                            <div class="text-left">
+                                <h3 class="text-sm font-bold tracking-wide">START LIVE MONITORING</h3>
+                                <p class="text-xs text-purple-200 mt-0.5">Observe real examination room camera feed</p>
+                            </div>
+                        </div>
+                        <span class="text-lg font-bold group-hover:translate-x-1 transition-transform">➔</span>
+                    </button>
+
+                    <button onclick="switchTab('video')" class="p-5 bg-white hover:bg-[#f5f2eb] border border-[#e2d9c7] text-[#3b2d54] rounded-2xl transition shadow-sm flex items-center justify-between group">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-2.5 bg-[#f0ebf8] text-[#3b2d54] rounded-xl border border-[#d9cee8]">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
+                            </div>
+                            <div class="text-left">
+                                <h3 class="text-sm font-bold tracking-wide">ANALYZE EXAMINATION VIDEO</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Review pre-recorded exam video files</p>
+                            </div>
+                        </div>
+                        <span class="text-lg font-bold text-[#3b2d54] group-hover:translate-x-1 transition-transform">➔</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- TAB 2: LIVE MONITORING -->
+            <div id="viewLive" class="flex-1 hidden flex flex-col space-y-5">
+                
+                <!-- Live Warning Status Banner -->
+                <div id="alertBanner" class="p-4 rounded-xl bg-white border border-[#e2d9c7] flex items-center justify-between transition-all duration-300 shadow-sm">
+                    <div class="flex items-center space-x-3">
+                        <div id="bannerBadge" class="p-2.5 rounded-lg bg-[#ecfdf5] text-[#137333]">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <h3 id="bannerTitle" class="text-base font-bold text-[#3b2d54] tracking-wide">MONITORING STATUS: NORMAL</h3>
+                            <p id="bannerSub" class="text-xs text-slate-500">Live Camera Monitoring Active</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span id="riskBadge" class="px-3 py-1 bg-[#ecfdf5] text-[#137333] border border-[#a7f3d0] text-xs font-mono font-bold rounded-lg">RISK SCORE: 0/100 (NORMAL)</span>
+                    </div>
+                </div>
+
+                <!-- Video View & Detections Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
+                    
+                    <!-- Video Frame Window (2 Columns) -->
+                    <div class="lg:col-span-2 bg-white border border-[#e2d9c7] rounded-2xl p-3 flex flex-col items-center justify-center relative overflow-hidden shadow-sm min-h-[420px]">
+                        
+                        <!-- Camera Device Selector -->
+                        <div id="cameraSelectContainer" class="absolute top-2 right-2 z-20 hidden">
+                            <select id="cameraSelect" class="text-xs bg-white border border-slate-300 rounded px-2 py-1 shadow-sm text-slate-700"></select>
+                        </div>
+                        
+                        <!-- Real Camera Feed (WebRTC) -->
+                        <div id="videoStreamContainer" class="w-full h-full relative hidden rounded-xl overflow-hidden bg-black flex items-center justify-center">
+                            <!-- Hidden original video stream (for frame capture) -->
+                            <video id="videoElement" autoplay playsinline muted class="hidden"></video>
+                            
+                            <!-- Display annotated stream from backend -->
+                            <img id="annotatedStream" class="w-full h-full object-contain" alt="Live YOLO Annotated Feed">
+                            
+                            <!-- Hidden canvas for capture -->
+                            <canvas id="captureCanvas" class="hidden"></canvas>
+                        </div>
+                        
+                        <!-- Camera Off Placeholder -->
+                        <div id="videoPlaceholder" class="flex flex-col items-center justify-center space-y-4 text-slate-500 p-8 text-center">
+                            <div class="p-4 bg-[#f0ebf8] rounded-full border border-[#d9cee8]">
+                                <svg class="w-12 h-12 stroke-[#5c4680]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-[#3b2d54]">CAMERA MONITORING OFF</h3>
+                                <p class="text-xs text-slate-500 mt-1 max-w-sm">Click "START LIVE MONITORING" to connect hardware USB webcam.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detections Side List (1 Column) -->
+                    <div class="bg-white border border-[#e2d9c7] rounded-2xl p-5 flex flex-col shadow-sm">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-[#5c4680] border-b border-[#eee9dd] pb-3 flex items-center justify-between mb-4">
+                            <span>REAL-TIME DETECTIONS</span>
+                            <span id="detectionCount" class="font-mono text-[#3b2d54]">0 Items</span>
+                        </h3>
+                        <div id="detectionList" class="space-y-3 overflow-y-auto max-h-[380px] custom-scrollbar flex-1 pr-1">
+                            <div class="text-center py-8 text-xs text-slate-400 italic">No objects currently detected</div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- TAB 3: VIDEO ANALYSIS -->
+            <div id="viewVideo" class="flex-1 hidden flex flex-col space-y-6">
+                <div class="bg-white border border-[#e2d9c7] rounded-2xl p-6 space-y-6 shadow-sm">
+                    <div>
+                        <h2 class="text-lg font-bold text-[#3b2d54] tracking-wide">VIDEO ANALYSIS</h2>
+                        <p class="text-xs text-slate-500 mt-1">Upload or select an examination video to review objects and possible suspicious behaviour.</p>
+                    </div>
+
+                    <!-- SAMPLE VIDEOS AREA -->
+                    <div class="bg-[#faf8f5] p-5 rounded-xl border border-[#e2d9c7] space-y-3">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-[#5c4680] flex items-center justify-between">
+                            <span>SAMPLE EXAMINATION VIDEOS</span>
+                            <span class="text-[10px] text-slate-500 font-mono">Folder: sample_videos/</span>
+                        </h3>
+                        
+                        <div id="sampleVideosContainer" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <button onclick="selectSampleVideo('sample_1_prohibited_object.mp4')" class="p-3 bg-white hover:bg-[#f0ebf8] border border-[#e2d9c7] hover:border-[#d9cee8] rounded-xl text-left transition group shadow-sm">
+                                <span class="text-xs font-bold text-[#3b2d54] block group-hover:text-[#5c4680]">[ Sample 1 — Prohibited Object ]</span>
+                                <span class="text-[10px] text-slate-500 block mt-1">Detects Phone, Earbuds, Smartwatch</span>
+                            </button>
+                            <button onclick="selectSampleVideo('sample_2_head_movement.mp4')" class="p-3 bg-white hover:bg-[#f0ebf8] border border-[#e2d9c7] hover:border-[#d9cee8] rounded-xl text-left transition group shadow-sm">
+                                <span class="text-xs font-bold text-[#3b2d54] block group-hover:text-[#5c4680]">[ Sample 2 — Repeated Head Movement ]</span>
+                                <span class="text-[10px] text-slate-500 block mt-1">Detects Repeated Head Turns</span>
+                            </button>
+                            <button onclick="selectSampleVideo('sample_3_object_passing.mp4')" class="p-3 bg-white hover:bg-[#f0ebf8] border border-[#e2d9c7] hover:border-[#d9cee8] rounded-xl text-left transition group shadow-sm">
+                                <span class="text-xs font-bold text-[#3b2d54] block group-hover:text-[#5c4680]">[ Sample 3 — Possible Object Passing ]</span>
+                                <span class="text-[10px] text-slate-500 block mt-1">Detects Spatial Object Transfer</span>
+                            </button>
+                        </div>
+
+                        <!-- Upload Custom Video File -->
+                        <div class="pt-3 border-t border-[#e2d9c7] flex items-center space-x-4">
+                            <input type="file" id="videoInput" accept="video/*" class="text-xs text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#eee9dd] file:text-[#3b2d54] hover:file:bg-[#e2d9c7] cursor-pointer flex-1">
+                            <span class="text-xs text-slate-400">or select a sample above</span>
+                        </div>
+                    </div>
+
+                    <!-- VIDEO PLAYER & ACTION AREA -->
+                    <div class="space-y-4">
+                        <div class="bg-black p-2 rounded-2xl border border-[#e2d9c7] flex flex-col items-center justify-center relative min-h-[300px]">
+                            <video id="analysisVideoPlayer" controls class="w-full max-h-[460px] rounded-xl bg-black"></video>
+                        </div>
+                        
+                        <div class="flex items-center justify-between bg-[#f0ebf8] p-4 rounded-xl border border-[#d9cee8]">
+                            <div>
+                                <h3 id="videoLoadedLabel" class="text-xs font-bold text-[#3b2d54]">No video selected</h3>
+                                <p class="text-[11px] text-slate-500 mt-0.5">Analyse the selected examination video for restricted objects and possible unusual behaviour.</p>
+                            </div>
+                            <div class="flex space-x-3">
+                            <button onclick="runStartAnalysis()" id="btnStartAnalysis" class="px-6 py-2.5 bg-[#3b2d54] hover:bg-[#4a3a69] text-white text-xs font-bold rounded-xl shadow transition flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>START ANALYSIS</span>
+                            </button>
+                            <button onclick="resetVideoAnalysis()" id="btnResetAnalysis" class="px-4 py-2.5 bg-[#eee9dd] hover:bg-[#e2d9c7] text-[#3b2d54] text-xs font-bold rounded-xl transition flex items-center space-x-2 hidden">
+                                <span>RESET</span>
+                            </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AFTER ANALYSIS RESULT VIEW -->
+                    <div id="videoResultContainer" class="hidden space-y-6 pt-4 border-t border-[#e2d9c7]">
+                        <div id="videoFinalStatus" class="hidden p-4 border rounded-xl font-bold text-sm text-center"></div>
+                        
+                        <div class="border-b border-[#eee9dd] pb-3 flex items-center justify-between">
+                            <div>
+                                <h3 class="text-base font-bold text-[#3b2d54]">EXAMINATION VIDEO REVIEW</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Analysis results from frame-by-frame object and behaviour detection</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-slate-500 block font-medium">OVERALL STATUS</span>
+                                <span id="videoStatusIndicator" class="text-sm font-bold text-[#137333] flex items-center space-x-1.5 mt-0.5 justify-end">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                    <span>NORMAL</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Metrics & Breakdown Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <!-- Risk Score Breakdown -->
+                            <div class="bg-[#faf8f5] p-5 rounded-2xl border border-[#e2d9c7] space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-[#5c4680]">Risk Score</h4>
+                                    <span id="videoRiskScore" class="text-lg font-mono font-bold text-[#3b2d54]">0 / 100</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 leading-relaxed italic border-t border-[#eee9dd] pt-2">
+                                    An indicator based on detected restricted objects and review-worthy behaviour. It is not a probability of cheating.
+                                </p>
+                            </div>
+
+                            <!-- Objects Detected -->
+                            <div class="bg-[#faf8f5] p-5 rounded-2xl border border-[#e2d9c7] space-y-3">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-[#5c4680] border-b border-[#eee9dd] pb-2 flex items-center justify-between">
+                                    <span>OBJECTS DETECTED</span>
+                                    <span id="videoObjCount" class="font-mono text-[#3b2d54]">0 Items</span>
+                                </h4>
+                                <div id="videoDetectedObjectsList" class="space-y-2 max-h-[180px] overflow-y-auto custom-scrollbar pr-1"></div>
+                            </div>
+
+                        </div>
+
+                        <!-- Behaviour Review -->
+                        <div class="bg-[#faf8f5] p-5 rounded-2xl border border-[#e2d9c7] space-y-3">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-[#5c4680] border-b border-[#eee9dd] pb-2 flex items-center justify-between">
+                                <span>BEHAVIOUR REVIEW</span>
+                                <span id="videoAlertsCount" class="font-mono text-[#3b2d54]">0 Events</span>
+                            </h4>
+                            <div id="videoBehaviourAlertsList" class="space-y-2 max-h-[220px] overflow-y-auto custom-scrollbar pr-1"></div>
+                            
+                            <p class="text-[11px] text-slate-500 pt-2 border-t border-[#eee9dd]">
+                                These observations help a human reviewer decide whether further examination is needed. They do not automatically confirm cheating.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>            <!-- TAB: IMAGE DETECTION -->
+            <div id="viewImage" class="hidden flex-1 flex-col space-y-6">
+                <div class="bg-white border border-[#e2d9c7] rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-lg font-bold text-[#3b2d54] mb-2">Image Detection & Analysis</h2>
+                    <p class="text-sm text-slate-500 mb-6">Upload an image to perform instantaneous YOLOv8s object detection.</p>
+                    
+                    <div class="flex flex-col lg:flex-row gap-6">
+                        <div class="flex-1 flex flex-col space-y-4">
+                            <div class="border-2 border-dashed border-[#d9cee8] bg-[#f0ebf8] rounded-xl p-8 flex flex-col items-center justify-center text-center">
+                                <input type="file" id="imageInput" accept="image/*" class="mb-4 text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#3b2d54] file:text-white hover:file:bg-[#4a3a69] cursor-pointer">
+                                <button id="btnAnalyzeImage" onclick="analyzeImage()" class="px-6 py-2.5 bg-[#3b2d54] text-white font-bold rounded-xl shadow-sm text-sm hover:bg-[#4a3a69] transition">ANALYZE IMAGE</button>
+                            </div>
+                            <div id="imageResultStats" class="grid grid-cols-2 gap-4 hidden">
+                                <div id="imageFinalStatus" class="col-span-2 hidden p-4 border rounded-xl font-bold text-sm text-center"></div>
+                                <div class="bg-white border border-[#e2d9c7] rounded-xl p-4 shadow-sm">
+                                    <span class="text-xs font-bold text-slate-500 block">Total Detections</span>
+                                    <span id="imgTotalDet" class="text-2xl font-bold text-[#3b2d54] block mt-1">0</span>
+                                </div>
+                                <div class="bg-white border border-[#e2d9c7] rounded-xl p-4 shadow-sm">
+                                    <span class="text-xs font-bold text-slate-500 block">Restricted Objects</span>
+                                    <span id="imgRestDet" class="text-2xl font-bold text-[#c5221f] block mt-1">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-1">
+                            <div class="bg-black border border-[#e2d9c7] rounded-2xl overflow-hidden shadow-sm flex items-center justify-center min-h-[300px] relative p-2">
+                                <img id="imagePreview" class="max-w-full max-h-[400px] object-contain rounded-xl" src="" style="display: none;">
+                                <div id="imagePlaceholder" class="text-slate-500 text-sm flex flex-col items-center">
+                                    <svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    Waiting for Image
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="imageDetList" class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 hidden">
+                        <!-- Items injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: EVIDENCE BASE -->
+            <div id="viewEvidence" class="hidden flex-1 flex-col space-y-6">
+                <div class="bg-white border border-[#e2d9c7] rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-lg font-bold text-[#3b2d54] mb-2">Evidence Repository</h2>
+                    <p class="text-sm text-slate-500 mb-6">Persistent record of all detected restricted objects across Live, Video, and Image analysis.</p>
+                    <div class="flex items-center space-x-4 mb-4">
+                        <button onclick="loadEvidence()" class="px-4 py-2 bg-[#f0ebf8] text-[#3b2d54] text-xs font-bold rounded-lg hover:bg-[#e6dff2]">REFRESH EVIDENCE</button>
+                        <div class="relative">
+                            <input type="file" id="manualEvidenceInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="uploadManualEvidence()">
+                            <button class="px-4 py-2 bg-[#3b2d54] text-white text-xs font-bold rounded-lg hover:bg-[#4a3a69]">UPLOAD EVIDENCE</button>
+                        </div>
+                    </div>
+                    
+                    <div id="evidenceGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Evidence injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: HISTORY LOGS -->
+            <div id="viewHistory" class="hidden flex-1 flex-col space-y-6">
+                <div class="bg-white border border-[#e2d9c7] rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-lg font-bold text-[#3b2d54] mb-2">Analysis History</h2>
+                    <p class="text-sm text-slate-500 mb-6">Chronological log of all system sessions and operations.</p>
+                    <button onclick="loadHistory()" class="mb-4 px-4 py-2 bg-[#f0ebf8] text-[#3b2d54] text-xs font-bold rounded-lg hover:bg-[#e6dff2]">REFRESH HISTORY</button>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-[#e2d9c7] text-xs text-slate-500 uppercase">
+                                    <th class="p-3">Date / Time</th>
+                                    <th class="p-3">Source Type</th>
+                                    <th class="p-3">Source Details</th>
+                                    <th class="p-3">Restricted Objects</th>
+                                    <th class="p-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody" class="text-sm text-slate-700">
+                                <!-- History injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- TAB 4: SETTINGS -->
+            <div id="viewSettings" class="flex-1 hidden flex flex-col space-y-6">
+                <div class="bg-white border border-[#e2d9c7] rounded-2xl p-6 space-y-6 shadow-sm">
+                    <div>
+                        <h2 class="text-lg font-bold text-[#3b2d54] tracking-wide">SYSTEM CONFIGURATION & SETTINGS</h2>
+                        <p class="text-xs text-slate-500 mt-1">Inspection of active system parameters and hardware audio alert settings.</p>
+                    </div>
+
+                    <div class="bg-[#faf8f5] p-5 rounded-2xl border border-[#e2d9c7] space-y-4 text-xs">
+                        <div class="flex justify-between py-2 border-b border-[#eee9dd]"><span class="text-slate-500">Monitoring Mode:</span> <span class="text-[#3b2d54] font-semibold">Active Real-Time Surveillance</span></div>
+                        <div class="flex justify-between py-2 border-b border-[#eee9dd]"><span class="text-slate-500">Camera Probing Order:</span> <span class="text-slate-700">Indices 0, 1, 2, 3</span></div>
+                        <div class="flex justify-between py-2 border-b border-[#eee9dd]"><span class="text-slate-500">Audio Alert Sequence:</span> <span class="text-[#b06000] font-medium">Small Exam Alarm Ring ➔ Short Pause ➔ Spoken Warning</span></div>
+                        <div class="flex justify-between py-2 border-b border-[#eee9dd]"><span class="text-slate-500">Speech Rate:</span> <span class="text-slate-700">150 WPM</span></div>
+                        <div class="flex justify-between py-2 border-b border-[#eee9dd]"><span class="text-slate-500">Voice Cooldown:</span> <span class="text-slate-700">4.0 Seconds</span></div>
+                        <div class="flex justify-between py-2"><span class="text-slate-500">Sample Videos Directory:</span> <span class="text-[#5c4680] font-mono">sample_videos/</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Frontend Application Logic Script -->
+    <script>
+        let pollTimer = null;
+        let isLiveActive = false;
+        let selectedFilename = null;
+
+        function switchTab(tabName) {
+            const tabs = ['dashboard', 'live', 'video', 'settings', 'image', 'evidence', 'history'];
+            tabs.forEach(t => {
+                const view = document.getElementById('view' + t.charAt(0).toUpperCase() + t.slice(1));
+                const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+                if (view && btn) {
+                    if (t === tabName) {
+                        view.classList.remove('hidden');
+                        btn.className = "w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition flex items-center justify-between bg-[#3b2d54] text-white shadow-sm";
+                    } else {
+                        view.classList.add('hidden');
+                        btn.className = "w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition flex items-center justify-between bg-[#f0ebf8] text-[#3b2d54] hover:bg-[#e6dff2]";
+                    }
+                }
+            });
+
+            if (tabName === 'video') {
+                loadSampleVideos();
+            }
+        }
+
+        async function loadSampleVideos() {
+            try {
+                const res = await fetch('/api/sample_videos');
+                const data = await res.json();
+                if (data.success && data.videos && data.videos.length > 0) {
+                    const container = document.getElementById('sampleVideosContainer');
+                    container.innerHTML = data.videos.map(v => `
+                        <button onclick="selectSampleVideo('${v.filename}')" class="p-3 bg-white hover:bg-[#f0ebf8] border border-[#e2d9c7] hover:border-[#d9cee8] rounded-xl text-left transition group shadow-sm">
+                            <span class="text-xs font-bold text-[#3b2d54] block group-hover:text-[#5c4680]">[ ${v.label} ]</span>
+                            <span class="text-[10px] text-slate-500 block mt-1 font-mono">${v.filename}</span>
+                        </button>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error("Failed to load sample videos:", err);
+            }
+        }
+
+        function selectSampleVideo(filename) {
+            selectedFilename = filename;
+            const player = document.getElementById('analysisVideoPlayer');
+            player.src = '/sample_videos/' + encodeURIComponent(filename);
+            player.load();
+            document.getElementById('videoLoadedLabel').innerText = "Selected Video: " + filename;
+            document.getElementById('videoResultContainer').classList.add('hidden');
+        }
+
+                async function runStartAnalysis() {
+            const btn = document.getElementById('btnStartAnalysis');
+            btn.disabled = true;
+            btn.innerText = "ANALYZING VIDEO...";
+            
+            const resultContainer = document.getElementById('videoResultContainer');
+            if (resultContainer) resultContainer.classList.add('hidden');
+            
+            // clear previous error if any
+            let errDiv = document.getElementById('videoErrorDiv');
+            if (!errDiv) {
+                errDiv = document.createElement('div');
+                errDiv.id = 'videoErrorDiv';
+                errDiv.className = 'mt-4 p-4 rounded-xl font-bold text-sm text-center bg-[#fce8e6] text-[#c5221f] border border-[#f5a9a8] hidden';
+                document.getElementById('btnStartAnalysis').parentNode.parentNode.appendChild(errDiv);
+            }
+            errDiv.classList.add('hidden');
+
+            try {
+                const fileInput = document.getElementById('videoInput');
+                let url = '/api/video/analyze';
+                let fetchOptions = { method: 'POST' };
+
+                if (fileInput.files && fileInput.files[0]) {
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    fetchOptions.body = formData;
+                } else if (selectedFilename) {
+                    url += '?sample_filename=' + encodeURIComponent(selectedFilename);
+                } else {
+                    url += '?sample_filename=sample_1_prohibited_object.mp4';
+                }
+
+                const res = await fetch(url, fetchOptions);
+
+                const data = await res.json();
+                btn.disabled = false;
+                document.getElementById("btnResetAnalysis").classList.remove("hidden");
+                btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>START ANALYSIS</span>`;
+
+                if (data.video_name || data.annotated_image_b64) {
+                    renderVideoAnalysisResult(data);
+                } else {
+                    errDiv.innerText = 'Analysis Error: ' + (data.detail || data.error || 'Failed to process video.');
+                    errDiv.classList.remove('hidden');
+                }
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerHTML = `<span>START ANALYSIS</span>`;
+                errDiv.innerText = 'Request failed: ' + err.message;
+                errDiv.classList.remove('hidden');
+            }
+        }
+
+                function resetVideoAnalysis() {
+            document.getElementById('videoResultContainer').classList.add('hidden');
+            document.getElementById('videoInput').value = '';
+            selectedFilename = null;
+            document.getElementById('videoLoadedLabel').innerText = 'No video selected';
+            document.getElementById('analysisVideoPlayer').src = '';
+            document.getElementById('btnStartAnalysis').disabled = false;
+            document.getElementById('btnStartAnalysis').innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>START ANALYSIS</span>';
+            document.getElementById('btnResetAnalysis').classList.add('hidden');
+        }
+
+        function renderVideoAnalysisResult(data) {
+            document.getElementById('videoResultContainer').classList.remove('hidden');
+
+            const vidFinalBox = document.getElementById('videoFinalStatus');
+            if (data.overall_status === 'RESTRICTED') {
+                vidFinalBox.innerText = 'Restricted object detected — REVIEW RECOMMENDED';
+                vidFinalBox.className = 'p-4 border rounded-xl font-bold text-sm text-center bg-[#fce8e6] text-[#c5221f] border-[#f5a9a8]';
+            } else if (data.overall_status === 'SUSPICIOUS') {
+                vidFinalBox.innerText = 'Potential suspicious behaviour detected — REVIEW RECOMMENDED';
+                vidFinalBox.className = 'p-4 border rounded-xl font-bold text-sm text-center bg-[#fef7e0] text-[#b06000] border-[#fdd835]';
+            } else {
+                vidFinalBox.innerText = 'No restricted object/suspicious event detected — NORMAL';
+                vidFinalBox.className = 'p-4 border rounded-xl font-bold text-sm text-center bg-[#ecfdf5] text-[#137333] border-[#a7f3d0]';
+            }
+            vidFinalBox.classList.remove('hidden');
+
+
+            const score = data.overall_risk_score || 0;
+            const level = data.overall_risk_level || (score >= 60 ? "HIGH RISK" : score >= 30 ? "ATTENTION" : "NORMAL");
+
+            document.getElementById('videoRiskScore').innerText = score + " / 100";
+
+            const statusInd = document.getElementById('videoStatusIndicator');
+            if (score >= 60) {
+                statusInd.className = "text-sm font-bold text-[#c5221f] flex items-center space-x-1.5 mt-0.5 justify-end";
+                statusInd.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-[#c5221f] animate-pulse"></span><span>HIGH RISK</span>`;
+            } else if (score >= 30) {
+                statusInd.className = "text-sm font-bold text-[#b06000] flex items-center space-x-1.5 mt-0.5 justify-end";
+                statusInd.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-[#b06000]"></span><span>ATTENTION</span>`;
+            } else {
+                statusInd.className = "text-sm font-bold text-[#137333] flex items-center space-x-1.5 mt-0.5 justify-end";
+                statusInd.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-[#137333]"></span><span>NORMAL</span>`;
+            }
+
+            // Render Detected Objects
+            const objList = document.getElementById('videoDetectedObjectsList');
+            const dets = data.detections || [];
+            document.getElementById('videoObjCount').innerText = dets.length + " Items";
+
+            if (dets.length === 0) {
+                objList.innerHTML = `<div class="p-3 bg-white rounded-xl border border-[#e2d9c7] text-xs text-slate-500 italic">No specific objects detected in sample frames.</div>`;
+            } else {
+                objList.innerHTML = dets.map(d => {
+                    const isProhibited = (d.category === 'RESTRICTED');
+                    const badgeClass = isProhibited ? "bg-[#fce8e6] text-[#c5221f] border-[#f5a9a8]" : "bg-[#ecfdf5] text-[#137333] border-[#a7f3d0]";
+                    const statusLabel = isProhibited ? "Restricted" : "Allowed";
+                    const symbol = isProhibited ? "⚠" : "✓";
+
+                    return `
+                        <div class="p-3 rounded-xl bg-white border border-[#e2d9c7] flex items-center justify-between text-xs shadow-sm">
+                            <div class="flex items-center space-x-2">
+                                <span class="font-bold ${isProhibited ? 'text-[#c5221f]' : 'text-[#137333]'}">${symbol}</span>
+                                <span class="font-bold text-slate-800 capitalize">${d.class_name || d.object_name}</span>
+                            </div>
+                            <span class="px-2 py-0.5 text-[11px] font-semibold rounded border ${badgeClass}">${statusLabel}</span>
+                        </div>`;
+                }).join('');
+            }
+
+            // Render Behaviour Review Alerts
+            const incidents = data.incidents || [];
+            document.getElementById('videoAlertsCount').innerText = incidents.length + " Events";
+
+            const alertList = document.getElementById('videoBehaviourAlertsList');
+            if (incidents.length === 0) {
+                alertList.innerHTML = `
+                    <div class="p-3.5 rounded-xl bg-[#ecfdf5] border border-[#a7f3d0] text-xs font-bold text-[#137333] flex items-center space-x-2">
+                        <span>✓</span>
+                        <span>No unusual behaviour detected</span>
+                    </div>`;
+            } else {
+                alertList.innerHTML = incidents.map(inc => {
+                    const eventType = inc.event_type || "Observed Behaviour Event";
+                    const timestamp = inc.time_formatted || "00:00:00";
+
+                    return `
+                        <div class="p-3.5 rounded-xl bg-[#fef7e0] border border-[#fdd835] flex items-center justify-between text-xs shadow-sm">
+                            <div class="flex items-center space-x-2.5">
+                                <span class="font-bold text-[#b06000]">⚠</span>
+                                <div>
+                                    <h5 class="font-bold text-slate-800">${eventType}</h5>
+                                    <p class="text-[10px] text-slate-500 mt-0.5">Timestamp: ${timestamp}</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-0.5 text-[10px] font-mono font-bold text-[#b06000] bg-white rounded border border-[#fdd835]">+${inc.risk_score || 20}</span>
+                        </div>`;
+                }).join('');
+            }
+        }
+
+        let localStream = null;
+        let isDetecting = false;
+
+        let lastVoiceAlertTime = 0;
+        // Preload audio
+        const voiceAudio = new Audio('/assets/prohibited_object_voice.mp3');
+        const beepAudio = new Audio('/assets/alert_beep.mp3');
+        voiceAudio.preload = 'auto';
+        beepAudio.preload = 'auto';
+
+        function playProhibitedObjectAlert(objectName) {
+            const now = Date.now();
+            if (now - lastVoiceAlertTime > 5000) { // 5s cooldown
+                lastVoiceAlertTime = now;
+                try {
+                    beepAudio.currentTime = 0;
+                    voiceAudio.currentTime = 0;
+                    
+                    const pBeep = beepAudio.play();
+                    if (pBeep !== undefined) {
+                        pBeep.then(() => {
+                            setTimeout(() => {
+                                const pVoice = voiceAudio.play();
+                                if (pVoice !== undefined) pVoice.catch(err => console.error("Voice playback failed:", err));
+                            }, 500); // play voice shortly after beep starts
+                        }).catch(e => {
+                            console.error("Beep playback failed:", e);
+                            // Fallback to voice if beep fails
+                            const pVoice = voiceAudio.play();
+                            if (pVoice !== undefined) pVoice.catch(err => console.error("Voice playback fallback failed:", err));
+                        });
+                    }
+                } catch(e) {
+                    console.error("Audio playback error:", e);
+                }
+            }
+        }
+
+        async function populateCameraList() {
+            const select = document.getElementById('cameraSelect');
+            const currentVal = select.value;
+            select.innerHTML = '';
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                    select.innerHTML = '<option value="">No MediaDevices API</option>';
+                    return;
+                }
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                
+                if (videoDevices.length === 0) {
+                    select.innerHTML = '<option value="">No Camera Found</option>';
+                    return;
+                }
+                
+                let hasFrontech = false;
+                videoDevices.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Camera ${index + 1}`;
+                    if (option.text.toLowerCase().includes('frontech')) hasFrontech = true;
+                    select.appendChild(option);
+                });
+                
+                if (currentVal && Array.from(select.options).some(o => o.value === currentVal)) {
+                    select.value = currentVal;
+                } else if (hasFrontech) {
+                    const frontechOpt = Array.from(select.options).find(o => o.text.toLowerCase().includes('frontech'));
+                    if (frontechOpt) select.value = frontechOpt.value;
+                }
+            } catch (err) {
+                console.error('Error enumerating devices:', err);
+                select.innerHTML = '<option value="">Error Loading Cameras</option>';
+            }
+        }
+
+        async function startCamera() {
+            try {
+                switchTab('live');
+                
+                if (localStream) {
+                    localStream.getTracks().forEach(t => t.stop());
+                }
+                
+                const select = document.getElementById('cameraSelect');
+                let constraints = { video: { facingMode: 'user' } };
+                if (select.value && select.value !== "No Camera Found" && select.value !== "No MediaDevices API") {
+                    constraints = { video: { deviceId: { exact: select.value } } };
+                }
+
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error("Browser does not support mediaDevices API. Please use localhost or HTTPS.");
+                }
+
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                } catch(e) {
+                    if (e.name === 'OverconstrainedError' || e.name === 'ConstraintNotSatisfiedError') {
+                        localStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    } else {
+                        throw e;
+                    }
+                }
+                
+                const videoEl = document.getElementById('videoElement');
+                videoEl.srcObject = localStream;
+                
+                try {
+                    await videoEl.play();
+                } catch(e) {
+                    console.warn("video.play() was interrupted", e);
+                }
+                
+                const tracks = localStream.getVideoTracks();
+                if (tracks.length === 0) {
+                    throw new Error("No video tracks found in the camera stream.");
+                }
+
+                await populateCameraList();
+                
+                document.getElementById('videoStreamContainer').classList.remove('hidden');
+                document.getElementById('cameraSelectContainer').classList.remove('hidden');
+                document.getElementById('videoPlaceholder').classList.add('hidden');
+                
+                try {
+                    console.log("Unlocking audio engines...");
+                    beepAudio.muted = true;
+                    voiceAudio.muted = true;
+                    let p1 = beepAudio.play();
+                    if (p1) p1.then(() => { beepAudio.pause(); beepAudio.currentTime = 0; beepAudio.muted = false; }).catch(e => console.warn('Beep unlock err:', e));
+                    let p2 = voiceAudio.play();
+                    if (p2) p2.then(() => { voiceAudio.pause(); voiceAudio.currentTime = 0; voiceAudio.muted = false; }).catch(e => console.warn('Voice unlock err:', e));
+                } catch(e) { console.warn("Unlock exception:", e); }
+                
+                isLiveActive = true;
+                captureLoop();
+                
+            } catch (err) {
+                let msg = err.message;
+                if (err.name === 'NotAllowedError') msg = 'Camera permission denied by user.';
+                else if (err.name === 'NotFoundError') msg = 'No camera device found.';
+                else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') msg = 'Camera is already in use by another application or tab.';
+                alert('Browser Camera Error: ' + msg);
+                console.error('Camera Error Detailed:', err);
+                stopCamera();
+            }
+        }
+
+        async function stopCamera() {
+            if (isLiveActive) {
+                // Save history
+                fetch('/api/history/add', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        source_type: 'Live Camera',
+                        source_details: 'Webcam Session',
+                        restricted_count: 0, // Placeholder
+                        status: 'COMPLETED'
+                    })
+                });
+            }
+            isLiveActive = false;
+            if (localStream) {
+                localStream.getTracks().forEach(t => t.stop());
+                localStream = null;
+            }
+            document.getElementById('videoElement').srcObject = null;
+            document.getElementById('annotatedStream').src = '';
+            
+            document.getElementById('videoStreamContainer').classList.add('hidden');
+            document.getElementById('cameraSelectContainer').classList.add('hidden');
+            document.getElementById('videoPlaceholder').classList.remove('hidden');
+            
+            updateUIState({ 
+                is_active: false, 
+                metrics: { monitoring_risk_score: 0, monitoring_risk_level: 'NORMAL' }, 
+                active_detections: [] 
+            });
+        }
+
+        async function captureLoop() {
+            if (!isLiveActive) return;
+            
+            const videoEl = document.getElementById('videoElement');
+            const canvas = document.getElementById('captureCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Only process if video has valid dimensions and not currently processing
+            if (videoEl.videoWidth > 0 && videoEl.videoHeight > 0 && !isDetecting) {
+                isDetecting = true;
+                
+                canvas.width = videoEl.videoWidth;
+                canvas.height = videoEl.videoHeight;
+                ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+                
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        isDetecting = false;
+                        setTimeout(captureLoop, 100);
+                        return;
+                    }
+                    
+                    const formData = new FormData();
+                    formData.append('file', blob, 'frame.jpg');
+                    
+                    try {
+                        const res = await fetch('/api/image/detect?conf=0.25&mode=live', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await res.json();
+                        
+                        if (data.video_name || data.annotated_image_b64) {
+                            // Display annotated image directly
+                            document.getElementById('annotatedStream').src = data.annotated_image_b64;
+                            
+                            // Map generic response to UI expectations
+                            let risk_score = 5;
+                            let restricted_count = 0;
+                            
+                            data.detections.forEach(d => {
+                                if (d.category === 'RESTRICTED') {
+                                    restricted_count++;
+                                }
+                            });
+                            
+                            if (data.events && data.events.length > 0) {
+                                risk_score = 65;
+                                data.events.forEach(ev => {
+                                    playProhibitedObjectAlert(ev.object_name);
+                                    const now = new Date();
+                                    const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
+                                    window.lastConfirmedEvent = `${timeStr} - Restricted object found: ${ev.object_name.charAt(0).toUpperCase() + ev.object_name.slice(1)}`;
+                                });
+                            }
+                            
+                            updateUIState({
+                                is_active: true,
+                                metrics: {
+                                    monitoring_risk_score: risk_score,
+                                    monitoring_risk_level: risk_score >= 60 ? 'HIGH' : 'LOW',
+                                    restricted_count: restricted_count
+                                },
+                                active_detections: data.detections
+                            });
+                        }
+                    } catch (err) {
+                        console.error('Detection inference failed:', err);
+                    }
+                    
+                    isDetecting = false;
+                    // Run next frame immediately
+                    requestAnimationFrame(captureLoop);
+                }, 'image/jpeg', 0.8);
+            } else {
+                // If dimensions 0 or busy, wait
+                setTimeout(captureLoop, 100);
+            }
+        }
+        
+        // Populate camera list on load
+        document.addEventListener('DOMContentLoaded', () => {
+            populateCameraList();
+            
+            // Re-bind change event to selector
+            document.getElementById('cameraSelect').addEventListener('change', () => {
+                if (isLiveActive) startCamera();
+            });
+        });
+
+        function updateUIState(data) {
+            const statusInd = document.getElementById('statusIndicator');
+            const statusTxt = document.getElementById('statusText');
+            const banner = document.getElementById('alertBanner');
+            const bannerBadge = document.getElementById('bannerBadge');
+            const bannerTitle = document.getElementById('bannerTitle');
+            const bannerSub = document.getElementById('bannerSub');
+            const detectionList = document.getElementById('detectionList');
+            const detectionCount = document.getElementById('detectionCount');
+            const dashCamStatus = document.getElementById('dashCamStatus');
+            const dashCamDot = document.getElementById('dashCamDot');
+
+            // Header Status Indicator & Dashboard Camera Status
+            if (data.is_active) {
+                statusInd.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
+                statusTxt.innerText = "System Live (Cam #" + 0 + ")";
+                if (dashCamStatus) dashCamStatus.innerText = "Active (Cam #" + 0 + ")";
+                if (dashCamDot) dashCamDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+            } else {
+                statusInd.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+                statusTxt.innerText = "System Ready";
+                if (dashCamStatus) dashCamStatus.innerText = "Available";
+                if (dashCamDot) dashCamDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+            }
+
+            const riskBadge = document.getElementById('riskBadge');
+            const score = data.metrics?.monitoring_risk_score || 0;
+            const level = data.metrics?.monitoring_risk_level || "NORMAL";
+
+            if (score >= 60) {
+                riskBadge.className = "px-3 py-1 bg-[#fce8e6] text-[#c5221f] border border-[#f5a9a8] text-xs font-mono font-bold rounded-lg animate-pulse";
+            } else if (score >= 30) {
+                riskBadge.className = "px-3 py-1 bg-[#fef7e0] text-[#b06000] border border-[#fdd835] text-xs font-mono font-bold rounded-lg";
+            } else {
+                riskBadge.className = "px-3 py-1 bg-[#ecfdf5] text-[#137333] border border-[#a7f3d0] text-xs font-mono font-bold rounded-lg";
+            }
+            riskBadge.innerText = "RISK SCORE: " + score + "/100 (" + level + ")";
+
+            if ((data.metrics?.restricted_count > 0)) {
+                banner.className = "p-4 rounded-xl bg-[#fce8e6] border border-[#f5a9a8] flex items-center justify-between shadow-sm";
+                bannerBadge.className = "p-2.5 rounded-lg bg-[#c5221f] text-white animate-pulse";
+                bannerTitle.innerText = "🚨 REVIEW RECOMMENDED / RESTRICTED";
+                bannerTitle.className = "text-base font-bold text-[#c5221f] tracking-wide";
+                bannerSub.innerText = window.lastConfirmedEvent || "Restricted Items Present";
+            } else {
+                banner.className = "p-4 rounded-xl bg-white border border-[#e2d9c7] flex items-center justify-between shadow-sm";
+                bannerBadge.className = "p-2.5 rounded-lg bg-[#ecfdf5] text-[#137333]";
+                bannerTitle.innerText = "✅ NORMAL / ALLOWED";
+                bannerTitle.className = "text-base font-bold text-[#3b2d54] tracking-wide";
+                bannerSub.innerText = "Live Camera Monitoring Active";
+            }
+
+            const detections = data.active_detections || [];
+            detectionCount.innerText = detections.length + " Items";
+
+            if (detections.length === 0) {
+                detectionList.innerHTML = `<div class="text-center py-8 text-xs text-slate-400 italic">No objects currently detected</div>`;
+                return;
+            }
+
+            detectionList.innerHTML = detections.map(d => {
+                const isProhibited = (d.category === 'RESTRICTED');
+                const badgeColor = isProhibited ? "bg-[#fce8e6] text-[#c5221f] border-[#f5a9a8]" : "bg-[#ecfdf5] text-[#137333] border-[#a7f3d0]";
+                const iconSymbol = isProhibited ? "🔴" : "🟢";
+                const confPct = Math.round(d.confidence * 100);
+
+                return `
+                    <div class="p-3.5 rounded-xl bg-[#faf8f5] border ${isProhibited ? 'border-[#f5a9a8]' : 'border-[#e2d9c7]'} flex items-center justify-between shadow-sm">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-base">${iconSymbol}</span>
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-800 capitalize">${d.class_name || d.object_name}</h4>
+                                <p class="text-[11px] text-slate-500 font-mono mt-0.5">Conf: <span class="text-slate-800 font-bold">${confPct}%</span></p>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="px-2 py-0.5 text-[10px] font-bold rounded border ${badgeColor}">${d.status}</span>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+     
+        
+        document.getElementById('videoInput').addEventListener('change', function(e) {
+            if(this.files && this.files[0]) {
+                selectedFilename = null;
+                document.getElementById('analysisVideoPlayer').src = URL.createObjectURL(this.files[0]);
+                document.getElementById('videoLoadedLabel').innerText = "Loaded: " + this.files[0].name;
+                document.getElementById('videoResultContainer').classList.add('hidden');
+            }
+        });
+
+        // IMAGE DETECTION LOGIC
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const img = document.getElementById('imagePreview');
+                img.src = URL.createObjectURL(this.files[0]);
+                img.style.display = 'block';
+                document.getElementById('imagePlaceholder').style.display = 'none';
+                document.getElementById('imageResultStats').classList.add('hidden');
+                document.getElementById('imageDetList').classList.add('hidden');
+            }
+        });
+
+        async function analyzeImage() {
+            const input = document.getElementById('imageInput');
+            if (!input.files || !input.files[0]) return alert("Select an image first.");
+            
+            const btn = document.getElementById('btnAnalyzeImage');
+            btn.innerText = "ANALYZING...";
+            btn.disabled = true;
+            
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+            
+            try {
+                const res = await fetch('/api/image/analyze_full', { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                document.getElementById('imagePreview').src = data.annotated_image_b64;
+                document.getElementById('imageResultStats').classList.remove('hidden');
+                document.getElementById('imgTotalDet').innerText = data.total_detections;
+                document.getElementById('imgRestDet').innerText = data.restricted_count;
+                
+                const imgFinalBox = document.getElementById('imageFinalStatus');
+                if (data.restricted_count > 0) {
+                    const restrictedObjs = data.detections.filter(d => d.category === 'RESTRICTED').map(d => (d.class_name || d.object_name).charAt(0).toUpperCase() + (d.class_name || d.object_name).slice(1)).join(', ');
+                    imgFinalBox.innerText = 'Image Status: RESTRICTED — ' + restrictedObjs + ' detected';
+                    imgFinalBox.className = 'col-span-2 p-4 border rounded-xl font-bold text-sm text-center bg-[#fce8e6] text-[#c5221f] border-[#f5a9a8]';
+                } else {
+                    imgFinalBox.innerText = 'Image Status: ALLOWED';
+                    imgFinalBox.className = 'col-span-2 p-4 border rounded-xl font-bold text-sm text-center bg-[#ecfdf5] text-[#137333] border-[#a7f3d0]';
+                }
+                imgFinalBox.classList.remove('hidden');
+                
+                const list = document.getElementById('imageDetList');
+                list.innerHTML = data.detections.map(d => {
+                    const bg = d.category === 'RESTRICTED' ? 'bg-[#fce8e6]' : 'bg-[#ecfdf5]';
+                    const text = d.category === 'RESTRICTED' ? 'text-[#c5221f]' : 'text-[#137333]';
+                    return `<div class="p-3 rounded-xl border border-[#e2d9c7] ${bg} ${text} text-center font-bold text-xs">
+                        ${(d.class_name || d.object_name).toUpperCase()} <br>
+                        <span class="text-[10px] font-normal text-slate-500">${d.confidence}% Confidence</span>
+                    </div>`;
+                }).join('');
+                list.classList.remove('hidden');
+            } catch (err) {
+                console.error(err);
+                alert("Failed to analyze image.");
+            }
+            
+            btn.innerText = "ANALYZE IMAGE";
+            btn.disabled = false;
+        }
+
+        
+        async function uploadManualEvidence() {
+            const input = document.getElementById('manualEvidenceInput');
+            if (!input.files || !input.files[0]) return;
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+            try {
+                const res = await fetch('/api/evidence/upload', {method: 'POST', body: formData});
+                if(res.ok) {
+                    loadEvidence();
+                    loadHistory();
+                } else {
+                    alert('Failed to upload evidence');
+                }
+            } catch(e) { console.error(e); }
+            input.value = '';
+        }
+        
+        // EVIDENCE LOGIC
+
+        async function loadEvidence() {
+            try {
+                const res = await fetch('/api/evidence');
+                const data = await res.json();
+                const grid = document.getElementById('evidenceGrid');
+                if (!data.evidence || data.evidence.length === 0) {
+                    grid.innerHTML = '<div class="col-span-full text-center text-slate-400 py-10">No evidence recorded yet.</div>';
+                    return;
+                }
+                
+                grid.innerHTML = data.evidence.map(e => `
+                    <div class="bg-white border border-[#e2d9c7] rounded-xl overflow-hidden shadow-sm flex flex-col">
+                        <img src="${e.image_url}" class="w-full h-48 object-cover bg-black" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWVlZWUiLz48L3N2Zz4='">
+                        <div class="p-4 flex-1 flex flex-col">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs font-bold px-2 py-0.5 rounded bg-[#f0ebf8] text-[#3b2d54] uppercase">${e.source_type}</span>
+                                <span class="text-[10px] text-slate-400">${new Date(e.timestamp * 1000).toLocaleString()}</span>
+                            </div>
+                            <h4 class="font-bold text-[#c5221f] text-sm uppercase mb-1">${e.object_name}</h4>
+                            <p class="text-xs text-slate-500">${e.confidence}% Confidence</p>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error("Failed to load evidence", err);
+            }
+        }
+
+        // HISTORY LOGIC
+        async function loadHistory() {
+            try {
+                const res = await fetch('/api/history');
+                const data = await res.json();
+                const tbody = document.getElementById('historyTableBody');
+                if (!data.history || data.history.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">No history recorded yet.</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = data.history.map(h => `
+                    <tr class="border-b border-[#eee9dd] hover:bg-[#faf8f5] transition">
+                        <td class="p-3 text-xs text-slate-500">${new Date(h.timestamp * 1000).toLocaleString()}</td>
+                        <td class="p-3 font-bold text-xs uppercase text-[#3b2d54]">${h.source_type}</td>
+                        <td class="p-3 text-xs truncate max-w-[150px]" title="${h.source_details}">${h.source_details}</td>
+                        <td class="p-3 text-xs font-bold ${h.restricted_count > 0 ? 'text-[#c5221f]' : 'text-slate-400'}">${h.restricted_count}</td>
+                        <td class="p-3"><span class="px-2 py-1 text-[10px] font-bold rounded ${h.status === 'NORMAL' ? 'bg-[#ecfdf5] text-[#137333]' : 'bg-[#fce8e6] text-[#c5221f]'}">${h.status}</span></td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error("Failed to load history", err);
+            }
+        }
+        
+        // Hook into switchTab to auto-refresh
+        const originalSwitchTab = switchTab;
+        switchTab = function(t) {
+            originalSwitchTab(t);
+            if (t === 'evidence') loadEvidence();
+            if (t === 'history') loadHistory();
+        }
+
+</script>
+</body>
+</html>
