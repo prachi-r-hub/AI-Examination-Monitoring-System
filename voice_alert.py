@@ -2,7 +2,12 @@ import time
 import queue
 import threading
 import sys
-import winsound
+
+try:
+    import winsound
+    HAS_WINSOUND = True
+except ImportError:
+    HAS_WINSOUND = False
 
 try:
     import pythoncom
@@ -55,7 +60,10 @@ class VoiceAlertManager:
                 pass
 
         try:
-            engine = pyttsx3.init('sapi5')
+            if sys.platform == "win32":
+                engine = pyttsx3.init('sapi5')
+            else:
+                engine = pyttsx3.init()
             engine.setProperty('rate', self.speech_rate)  # Slower, natural speaking rate (~155 WPM)
             engine.setProperty('volume', 1.0)
 
@@ -87,11 +95,12 @@ class VoiceAlertManager:
                 text = self.alert_queue.get(timeout=0.2)
                 if text:
                     # Step 1: Small examination-monitoring ring sound (two short tones)
-                    try:
-                        winsound.Beep(1500, 100)
-                        winsound.Beep(1800, 150)
-                    except Exception as ring_err:
-                        print(f"[ERROR] Alarm ring sound playback failed: {ring_err}", file=sys.stderr)
+                    if HAS_WINSOUND:
+                        try:
+                            winsound.Beep(1500, 100)
+                            winsound.Beep(1800, 150)
+                        except Exception as ring_err:
+                            print(f"[ERROR] Alarm ring sound playback failed: {ring_err}", file=sys.stderr)
 
                     # Short pause between ring sound and speech
                     time.sleep(0.20)
